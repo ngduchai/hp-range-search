@@ -23,7 +23,7 @@ MAKE = $(CC) $(INC)
 HEADER = $(wildcard $(INCLUDE)/*.h)
 
 # Object files needed by modules
-TEST_ITEMS = tests/items.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
+TEST_BPTREE = tests/bptree.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
 TEST_HUGE = tests/hugepage.cpp $(addprefix $(OBJ)/, mm.o)
 SERVER = tests/server.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
 TEST_OPERATIONS = tests/operations.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
@@ -35,10 +35,10 @@ all:
 
 test: items huge 
 
-# Test item builder and data retrieval methods
-items: $(TEST_ITEMS)
-	$(MAKE) $(LFLAGS) $(TEST_ITEMS) -o $(ROOT)/$(TESTS)/run_test_items $(LIB)
-	$(ROOT)/$(TESTS)/run_test_items
+# Test B+ Tree functionalities
+bptree: $(TEST_BPTREE)
+	$(MAKE) $(LFLAGS) $(TEST_ITEMS) -o $(ROOT)/$(TESTS)/run_test_bptree $(LIB)
+	$(ROOT)/$(TESTS)/run_test_bptree
 
 # Test hugepace functionalities
 huge: $(TEST_HUGE)

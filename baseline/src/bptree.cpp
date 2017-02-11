@@ -460,7 +460,7 @@ bool bptree::bpnode::coalesce( bpnode * _left, bpnode * _right,
 
 	}else {
 
-		itemkey key(0); 
+		itemkey key(0UL); 
 		for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
 			if( it->second == _left ){
 				key = it->first;
@@ -779,4 +779,12 @@ void bptree::printValues() {
 
 	printf("\n");  
 }
+
+rqdesc bptree::find(rquery query) {
+	return rqdesc(query, find(query.start));
+}
+
+
+
+
 

@@ -10,6 +10,7 @@
 #include <set>
 
 #include "common.h"
+#include "query.h"
 
 #define SUCCESS       0
 #define UNKNOWN_ERROR 1
@@ -25,6 +26,9 @@
 #define CEIL(x, y)  int( (x - 1) / (y) + 1 )
 
 using namespace std;
+
+/* B+ Tree - a simple 1D index structure */
+
 
 class bptree {
 private:
@@ -203,6 +207,10 @@ public:
 	bool insert(itemkey _key, itemptr& _value);
 	bool remove(itemkey _key);
 	itemptr * find(itemkey _key);
+	
+	rqdesc find(rquery query);
+	itemptr * find(rqdesc *desc);
+
 	void printKeys();
 	void printValues();
 
