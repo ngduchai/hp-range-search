@@ -1,5 +1,5 @@
 
-INC = -Iinclude -Iinclude/hashtable
+INC = -Iinclude -Iinclude/bwtree
 LIB = -lpthread -libverbs -lrdmacm
 
 SRC = src
@@ -23,7 +23,7 @@ MAKE = $(CC) $(INC)
 HEADER = $(wildcard $(INCLUDE)/*.h)
 
 # Object files needed by modules
-TEST_BPTREE = tests/bptree.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
+TEST_BWTREE = tests/bw.cpp $(addprefix $(OBJ)/, bwtree.o)
 TEST_HUGE = tests/hugepage.cpp $(addprefix $(OBJ)/, mm.o)
 SERVER = tests/server.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
 TEST_OPERATIONS = tests/operations.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
@@ -35,9 +35,15 @@ all:
 
 test: items huge 
 
-# Test B+ Tree functionalities
-bptree: $(TEST_BPTREE)
-	$(MAKE) $(LFLAGS) $(TEST_ITEMS) -o $(ROOT)/$(TESTS)/run_test_bptree $(LIB)
+# Compile BwTree
+HEADER_BW =  $(wildcard $(INCLUDE)/bwtree/*.h)
+OPT_BW = -mcx16 -Wno-invalid-offsetof -Ofast -frename-registers -funroll-loops -flto -march=native -DNDEBUG -DBWTREE_NODEBUG
+$(OBJ)/bwtree.o: ${HEADER_BW} src/bwtree.cpp
+	$(MAKE) $(CFLAGS) $(OPT_BW) $(SRC)/bwtree.cpp -o $(OBJ)/bwtree.o -lpthread -lboost_system -lboost_thread
+
+# Test Bw Tree functionalities
+bwtree: $(TEST_BWTREE) 
+	$(MAKE) $(LFLAGS) $(TEST_BWTREE) -o $(ROOT)/$(TESTS)/run_test_bptree $(LIB)
 	$(ROOT)/$(TESTS)/run_test_bptree
 
 # Test hugepace functionalities

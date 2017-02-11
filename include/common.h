@@ -19,26 +19,29 @@ typedef char * BYTE;
 /* Item wrapper, just points to item's address, does not actually
  * contain data */
 
-class itemkey {
-private:
-	char _data [KEY_SIZE];
-public:
-	itemkey() {}
 
-	itemkey(uint64_t value) {
+typedef uint64_t key64_t;
+
+class key128_t {
+private:
+	char _data [128];
+public:
+	key128_t() {}
+
+	key128_t(uint64_t value) {
 		((uint64_t*)_data)[0] = 0;
 		((uint64_t*)_data)[1] = value;
 	}
 
-	itemkey(const char * value) {
-		memcpy(_data, value, KEY_SIZE);
+	key128_t(const char * value) {
+		memcpy(_data, value, 16);
 	}
 
-	itemkey(const itemkey & that) {
+	key128_t(const key128_t & that) {
 		*this = that;
 	};
 
-	inline int comp_key(const itemkey& that) {
+	inline int comp_key(const key128_t& that) {
 		uint64_t * tskey = (uint64_t*)this->_data;
 		uint64_t * ttkey = (uint64_t*)that._data;
 		uint64_t c = tskey[0] - ttkey[0];
@@ -49,39 +52,58 @@ public:
 		}
 	}
 
-	bool operator==(const itemkey& that) {
+	bool operator==(const key128_t& that) {
 		return (this->comp_key(that) == 0);
 	}
-	bool operator<(const itemkey& that) {
+	bool operator<(const key128_t& that) {
 		return (this->comp_key(that) < 0);
 	}
-	bool operator>(const itemkey& that) {
+	bool operator>(const key128_t& that) {
 		return (this->comp_key(that) > 0);
 	}
-	bool operator<=(const itemkey& that) {
+	bool operator<=(const key128_t& that) {
 		return (this->comp_key(that) <= 0);
 	}
-	bool operator>=(const itemkey& that) {
+	bool operator>=(const key128_t& that) {
 		return (this->comp_key(that) >= 0);
 	}
-	bool operator!=(const itemkey& that) {
+	bool operator!=(const key128_t& that) {
 		return (this->comp_key(that) != 0);
 	}
 
 	inline char * value() { return _data; }
 
-
-
 };
 
 /* Range query definition (a pair of keys) */
+template <typename KEY>
 class rquery {
 public:
-	itemkey start;
-	itemkey end;
+	KEY start;
+	KEY end;
 	rquery() {};
-	rquery(const itemkey &start, const itemkey &end) :
+	rquery(const KEY &start, const KEY &end) :
 		start(start), end(end) {};
+};
+
+/* Compare two key. */
+template <typename KEY>
+class key_comparator {
+public:
+	inline bool operator() (const KEY& k1, const KEY& k2) const {
+		return k1 < k2;
+	}
+	key_comparator() = delete;
+};
+
+/* Check if two key is equal */
+template <typename KEY>
+class key_equality_checker {
+public:
+	inline bool operator() (const KEY& k1, const KEY& k2) const {
+		return (k1 == k2);
+	}
+	key_equality_checker() = delete;
 };
 
 
