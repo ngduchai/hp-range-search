@@ -7,11 +7,13 @@ OBJ = obj
 TESTS = tests
 INCLUDE = include
 
+OPT_BW = -mcx16 -Wno-invalid-offsetof -Ofast -frename-registers -funroll-loops -flto -march=native -DNDEBUG -DBWTREE_NODEBUG
+
 CC = g++
 STD = -std=c++11
 DEBUG = -g
-CFLAGS = -Wall -c -O2 $(DEBUG) $(STD)
-LFLAGS = -Wall -O2 $(DEBUG) $(STD)
+CFLAGS = -Wall -c -O2 $(OPT_BW) $(DEBUG) $(STD)
+LFLAGS = -Wall -O2 $(OPT_BW) $(DEBUG) $(STD)
 
 ROOT = .
 
@@ -37,9 +39,8 @@ test: items huge
 
 # Compile BwTree
 HEADER_BW =  $(wildcard $(INCLUDE)/bwtree/*.h)
-OPT_BW = -mcx16 -Wno-invalid-offsetof -Ofast -frename-registers -funroll-loops -flto -march=native -DNDEBUG -DBWTREE_NODEBUG
 $(OBJ)/bwtree.o: ${HEADER_BW} src/bwtree.cpp
-	$(MAKE) $(CFLAGS) $(OPT_BW) $(SRC)/bwtree.cpp -o $(OBJ)/bwtree.o -lpthread -lboost_system -lboost_thread
+	$(MAKE) $(CFLAGS) $(SRC)/bwtree.cpp -o $(OBJ)/bwtree.o -lpthread -lboost_system -lboost_thread
 
 # Test Bw Tree functionalities
 bwtree: $(TEST_BWTREE) 

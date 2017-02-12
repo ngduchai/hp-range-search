@@ -6,13 +6,16 @@
 using namespace std;
 
 int main() {
-	bptree<key128_t, long, rquery<key128_t>> tree;
+	bptree<long, long, rquery<long>> tree;
 	vector<long> values {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 	for (auto item : values) {
-		tree.insert(key128_t(item), item);
+		tree.insert(item, item);
 	}
-	auto iter = tree.find(key128_t(7));
-	cout << iter->second << endl;
+	auto iter = tree.find(rquery<long>(6, 7));
+	while (iter.valid()) {
+		cout << iter.value() << endl;
+		iter.next();
+	}
 }
 
 
