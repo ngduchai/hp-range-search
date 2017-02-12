@@ -62,7 +62,7 @@ private:
 	};
 
 public:
-	
+
 	inline typename Index::cursor find(const QUERY& query) { 
 		return typename Index::cursor(new cursor_imp(query, &_tree));
 	}

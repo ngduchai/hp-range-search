@@ -12,8 +12,8 @@ OPT_BW = -mcx16 -Wno-invalid-offsetof -Ofast -frename-registers -funroll-loops -
 CC = g++
 STD = -std=c++11
 DEBUG = -g
-CFLAGS = -Wall -c -O2 $(OPT_BW) $(DEBUG) $(STD)
-LFLAGS = -Wall -O2 $(OPT_BW) $(DEBUG) $(STD)
+CFLAGS = -Wall -c $(OPT_BW) $(DEBUG) $(STD)
+LFLAGS = -Wall $(OPT_BW) $(DEBUG) $(STD)
 
 ROOT = .
 
@@ -23,6 +23,7 @@ vpath %.h $(INCLUDE)
 MAKE = $(CC) $(INC)
 
 HEADER = $(wildcard $(INCLUDE)/*.h)
+HEADER_BW = $(wildcard $(INCLUDE)/bwtree/*.h)
 
 # Object files needed by modules
 TEST_BWTREE = tests/bw.cpp $(addprefix $(OBJ)/, bwtree.o)
@@ -37,13 +38,8 @@ all:
 
 test: items huge 
 
-# Compile BwTree
-HEADER_BW =  $(wildcard $(INCLUDE)/bwtree/*.h)
-$(OBJ)/bwtree.o: ${HEADER_BW} src/bwtree.cpp
-	$(MAKE) $(CFLAGS) $(SRC)/bwtree.cpp -o $(OBJ)/bwtree.o -lpthread -lboost_system -lboost_thread
-
 # Test Bw Tree functionalities
-bwtree: $(TEST_BWTREE) 
+bwtree: $(TEST_BWTREE) $(HEADER_BW)
 	$(MAKE) $(LFLAGS) $(TEST_BWTREE) -o $(ROOT)/$(TESTS)/run_test_bptree $(LIB)
 	$(ROOT)/$(TESTS)/run_test_bptree
 
