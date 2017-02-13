@@ -11,10 +11,12 @@
 /* Data size */
 #define DATA_SIZE (ITEM_SIZE - KEY_SIZE - KEY_SIZE)
 
+
 #include <iostream>
+#include <stdexcept>
 #include "string.h"
 
-typedef char * BYTE;
+#define CHECK_RUNTIME(V, M) if (V) { throw std::runtime_error(M); }
 
 /* Item wrapper, just points to item's address, does not actually
  * contain data */
@@ -104,6 +106,13 @@ public:
 		return (k1 == k2);
 	}
 	key_equality_checker() = delete;
+};
+
+class packet_t {
+public:
+	enum : short { INSERT, DELETE, RANGE } tp;
+	bool adata = false;
+	uint32_t size;
 };
 
 
