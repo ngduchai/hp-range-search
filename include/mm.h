@@ -3,7 +3,6 @@
 #define LARM_MM_H
 
 #include "define.h"
-#include "indata.h"
 
 namespace LARM {
 

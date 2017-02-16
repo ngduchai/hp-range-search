@@ -4,6 +4,15 @@
 #include <common.h>
 #include <vector>
 
+/* Query code */
+class rcode_t {
+public:
+	uintptr_t code;
+	uint64_t checksum;
+	uint32_t num;
+	bool has_next;
+};
+
 template <typename KEY, typename VALUE, typename QUERY>
 class dbint {
 protected:
@@ -11,6 +20,7 @@ protected:
 	protected:
 		QUERY _query;
 		bool _valid = false;
+		rcode_t _code;
 		cursor_imp() = delete;
 	public:
 		cursor_imp(const QUERY& query) : _query(query) {};
@@ -22,6 +32,7 @@ protected:
 		virtual bool next() = 0;
 		virtual bool valid() = 0;
 		virtual ~cursor_imp() {};
+		virtual char * free_buffer() = 0;
 	};
 
 public:

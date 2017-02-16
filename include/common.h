@@ -110,7 +110,7 @@ public:
 
 class packet_t {
 public:
-	enum : short { INSERT, DELETE, RANGE } tp;
+	enum : short { INSERT, REMOVE, RANGE, GETRANGE } tp;
 	bool adata = false;
 	uint32_t size;
 };

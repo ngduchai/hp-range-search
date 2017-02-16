@@ -22,6 +22,11 @@ using namespace std;
 int num_segs = 0;
 mem_seg_t * seg_info = NULL;
 
+struct litem_header {
+	uint32_t sig;
+	uint32_t lsize;
+	atomic<litem_header*> next_slot;	
+};
 
 struct {
 	BYTE base; // base pointer of the shared address space
