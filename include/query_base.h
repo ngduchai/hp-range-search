@@ -120,11 +120,18 @@ protected:
 		void request_range() {
 			uint32_t size = sizeof(this->_code.code);
 			size += sizeof(packet_t);
+			size += sizeof(uintptr_t);
 			packet_t * packet = (packet_t*)larm_malloc(size);
 			packet->tp = packet_t::GETRANGE;
 			packet->size = size;
-			*(uintptr_t*)(&packet[1]) = this->_code.code;
+			uintptr_t * addr = (uintptr_t*)(&packet[1]);
+			*addr = (uintptr_t)this->_code.code; addr++;
+			*addr = (uintptr_t)this->buffer();
 			send((char*)packet, size, 0);
+			rcode_t * code = (rcode_t*)this->buffer();
+			code->code = 0;
+			code->num = 0;
+
 		}
 
 	};

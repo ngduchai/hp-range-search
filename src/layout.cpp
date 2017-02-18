@@ -14,8 +14,8 @@ index_t::cursor isearch(const rquery<SKEY>& query) {
 	return iindex.find(query);
 }
 
-bool iinsert(const item_t& record) {
-	return iindex.insert(record.skey, (item_t* const)&record);
+bool iinsert(SKEY& key, const item_t& record) {
+	return iindex.insert(key, (item_t* const)&record);
 }
 
 bool iremove(const SKEY& key) {

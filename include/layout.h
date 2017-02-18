@@ -28,6 +28,11 @@ public:
 		pkey(pkey), skey(skey), sz(size) {}
 	item_t(PKEY pkey, SKEY skey) :
 		item_t(pkey, skey, MIN_DATA_SIZE) {}
+	item_t& operator=(const item_t& that) {
+		pkey = that.pkey;
+		skey = that.skey;
+		return *this;
+	}
 	uint32_t size() { return sz; }
 };
 
@@ -37,7 +42,7 @@ bool isearch(const SKEY key, std::vector<item_t*>& value);
 
 index_t::cursor isearch(const rquery<SKEY>& query);
 
-bool iinsert(const item_t& record);
+bool iinsert(SKEY& key, const item_t& record);
 
 bool iremove(const SKEY& key);
 
