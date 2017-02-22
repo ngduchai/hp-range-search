@@ -15,6 +15,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "string.h"
+#include <sys/time.h>
 
 #define CHECK_RUNTIME(V, M) if (V) { throw std::runtime_error(M); }
 
@@ -115,6 +116,7 @@ public:
 	uint32_t size;
 };
 
+time_t time_us(void);
 
 
 #endif

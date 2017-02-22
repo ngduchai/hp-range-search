@@ -7,7 +7,7 @@ OBJ = obj
 TESTS = tests
 INCLUDE = include
 
-OPT_BW = -mcx16 -Wno-invalid-offsetof -Ofast -frename-registers -funroll-loops -flto -march=native -DNDEBUG -DBWTREE_NODEBUG
+OPT_BW = -mcx16 -Wno-invalid-offsetof -frename-registers -funroll-loops -flto -march=native -DNDEBUG -DBWTREE_NODEBUG
 
 CC = g++
 STD = -std=c++11
@@ -28,8 +28,8 @@ HEADER_BW = $(wildcard $(INCLUDE)/bwtree/*.h)
 # Object files needed by modules
 TEST_BWTREE = tests/bw.cpp $(addprefix $(OBJ)/, bwtree.o)
 TEST_HUGE = tests/hugepage.cpp $(addprefix $(OBJ)/, mm.o)
-SERVER = tests/server.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
-TEST_OPERATIONS = tests/operations.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
+SERVER = tests/server.cpp $(addprefix $(OBJ)/, mm.o procs_base.o bnet.o layout.o) 
+TEST_UNI = tests/uni.cpp $(addprefix $(OBJ)/, mm.o bnet.o procs_base.o layout.o common.o)
 RG_BEN = tests/rgben.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
 VERBS = tests/verbs.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
 STRESS = $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
@@ -53,11 +53,11 @@ huge: $(TEST_HUGE)
 server: $(SERVER)
 	$(MAKE) $(LFLAGS) $(SERVER) -o $(ROOT)/$(TESTS)/run_server $(LIB)
 	$(ROOT)/release-hugepage.sh
-	$(ROOT)/$(TESTS)/run_server
+	$(ROOT)/$(TESTS)/run_server 12345
 
-operations: $(TEST_OPERATIONS)
-	$(MAKE) $(LFLAGS) $(TEST_OPERATIONS) -o $(ROOT)/$(TESTS)/run_test_operations $(LIB)
-	$(ROOT)/$(TESTS)/run_test_operations
+uni: $(TEST_UNI)
+	$(MAKE) $(LFLAGS) $(TEST_UNI) -o $(ROOT)/$(TESTS)/run_test_uni $(LIB)
+	$(ROOT)/$(TESTS)/run_test_uni
 
 
 rgben: $(RG_BEN)

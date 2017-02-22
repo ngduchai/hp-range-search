@@ -11,7 +11,7 @@
 #include <iostream>
 
 #define LARM_NET_BASE 	base
-#define BUFFER_SIZE	(1 << 15)
+#define BUFFER_SIZE	(1 << 16)
 #define NUM_WORKERS	12
 
 #define NUM_QUEUES	8
@@ -55,7 +55,8 @@ namespace LARM_NET_BASE {
 		LARM::BYTE res;
 		size_t size;
 		bool change = false;
-		bool ans = true;
+		bool wrt = true;
+		uintptr_t addr;
 	};
 
 	struct base_task {
@@ -119,7 +120,7 @@ namespace LARM_NET_BASE {
 		void _on_established(void * context);
 
 		void _post_send(LARM::BYTE buff, size_t size) const;
-		void _post_receive() const;
+		void _post_receive(LARM::BYTE data) const;
 
 		std::list<std::pair<LARM::BYTE, uint32_t>> _send_data;
 		size_t _send_size;
@@ -130,7 +131,7 @@ namespace LARM_NET_BASE {
 		LARM::BYTE read(LARM::BYTE ptr, size_t size) const;
 		bool write(LARM::BYTE data, LARM::BYTE ptr, size_t size) const;
 		bool send(LARM::BYTE ptr, size_t size);
-		LARM::BYTE exchange(LARM::BYTE ptr, size_t size);
+		void exchange(LARM::BYTE ptr, LARM::BYTE data, size_t size);
 		~base_client();
 		std::string hostname;
 	};

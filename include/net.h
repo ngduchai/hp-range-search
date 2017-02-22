@@ -40,7 +40,8 @@ namespace LARM_NET {
 	bool send(LARM::BYTE ptr, size_t size, uint32_t code);
 
 	/* Send some bytes to node [node] */
-	LARM::BYTE exchange(LARM::BYTE ptr, size_t size, uint32_t code);
+	void exchange(LARM::BYTE ptr, LARM::BYTE data,
+			size_t size, uint32_t code);
 
 	/* LARM client. Manage connection to a host in the system */
 	class client {
@@ -65,7 +66,8 @@ namespace LARM_NET {
 		virtual bool send(LARM::BYTE ptr, size_t size) = 0;
 
 		/* Send message to the remote host and wait for response */
-		virtual LARM::BYTE exchange(LARM::BYTE ptr, size_t size) = 0;
+		virtual void exchange(LARM::BYTE ptr, LARM::BYTE data,
+			size_t size) = 0;
 
 		/* Get nodeid of the remote host that the client connects to */
 		inline nodeid_t get_nodeid() const { return _nodeid; };

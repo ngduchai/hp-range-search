@@ -7,6 +7,8 @@
 #include "bptree.h"
 #include "query_base.h"
 
+#include <iostream>
+
 using namespace LARM::INLARM::LARM_MM;
 
 struct range_ptr {
@@ -17,46 +19,51 @@ struct range_ptr {
 	bptree<SKEY, item_t*, rquery<SKEY>>::cursor cursor;
 };
 
-void get_items(range_ptr * ptr, char * data) {
+int get_items(range_ptr * ptr, char * data) {
 	int size = sizeof(rcode_t);
 	rcode_t * code = (rcode_t*)data;
 	item_t * items =  (item_t*)(&code[1]);
 	uint64_t checksum = 0;
 	uint32_t num = 0;
 	auto cursor = ptr->cursor;
-	while (cursor.valid() && size < BUFFER_IMP_SIZE) {
+	while (cursor.valid() && size < BUFFER_SIZE * 0.7) {
 		*items = *cursor.value();
 		checksum ^= items->skey;
-		cursor.next();
 		num++; items++; size += cursor.value()->size();
+		cursor.next();
 	}
 	code->checksum = checksum;
 	code->num = num;
+	std::cout << items[-1].size() << std::endl; 
 	if (cursor.valid()) {
 		code->code = (uintptr_t)ptr;
 		code->has_next = true;
 	}else{
+		code->code = 1UL;
 		code->has_next = false;
 	}
+	return size;
 
 }
 
-void process_range(packet_t * packet, char * data) {
+int process_range(packet_t * packet, char * data) {
 	rquery<SKEY> * query = (rquery<SKEY>*)(&packet[1]);
 	auto cursor = isearch(*query);
 	range_ptr * ptr = new range_ptr(*query, cursor);
-	get_items(ptr, data);
+	int size = get_items(ptr, data);
 	if (!ptr->cursor.valid()) {
 		delete ptr;
 	}
+	return size;
 }
 
-void update_range(packet_t * packet, char * data) {
+int update_range(packet_t * packet, char * data) {
 	range_ptr * ptr = (range_ptr*)(&packet[1]);
-	get_items(ptr, data);
+	int size = get_items(ptr, data);
 	if (!ptr->cursor.valid()) {
 		delete ptr;
 	}
+	return size;
 }
 
 void * processor(void * args) {
@@ -69,22 +76,31 @@ void * processor(void * args) {
 		item_t * value = (item_t*)larm_malloc(sizeof(item_t));
 		*value = *(item_t*)(&key[1]);
 		iinsert(*key, *value);
-		conn->ans = true;
+		conn->wrt = true;
+		conn->size = sizeof(uint64_t);
+		*(uint64_t*)conn->res = 0UL;
 		break;
 	}
 	case packet_t::REMOVE: {
 		SKEY * key = (SKEY*)(&packet[1]);
 		iremove(*key);
-		conn->ans = false;
+		conn->wrt = true;
+		conn->size = sizeof(uint64_t);
+		*(uint64_t*)conn->res = 0UL;
 		break;
 	}
 	case packet_t::RANGE: {
-		process_range(packet, conn->res);
-		conn->ans = false;
+		conn->size = process_range(packet, conn->res);
+		conn->wrt = true;
+		conn->addr = (uintptr_t)
+			((char*)(&packet[1]) + sizeof(rquery<SKEY>));
 		break;
 	}
 	case packet_t::GETRANGE:
-		update_range(packet, conn->res);
+		conn->size = update_range(packet, conn->res);
+		conn->wrt = true;
+		conn->addr = (uintptr_t)
+			((char*)(&packet[1]) + sizeof(rquery<SKEY>));
 		break;
 	}
 	return NULL;

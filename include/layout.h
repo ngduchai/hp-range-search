@@ -16,24 +16,26 @@ typedef uint64_t SKEY;
 
 /* The real data */
 class item_t {
+private:
+	uint32_t sz = MIN_DATA_SIZE;
 public:
 	PKEY pkey;
 	SKEY skey;
-	const uint32_t sz;
 	char data [MIN_DATA_SIZE - sizeof(pkey) -
 		sizeof(skey) - sizeof(sz)];
 	item_t() : sz(MIN_DATA_SIZE) {}
 	item_t(uint32_t size) : sz(size) {}
 	item_t(PKEY pkey, SKEY skey, uint32_t size) :
-		pkey(pkey), skey(skey), sz(size) {}
+		sz(size), pkey(pkey), skey(skey) {}
 	item_t(PKEY pkey, SKEY skey) :
 		item_t(pkey, skey, MIN_DATA_SIZE) {}
 	item_t& operator=(const item_t& that) {
 		pkey = that.pkey;
 		skey = that.skey;
+		sz = that.sz;
 		return *this;
 	}
-	uint32_t size() { return sz; }
+	uint32_t size() const { return sz; }
 };
 
 using index_t = indexstr_t<SKEY, item_t*, rquery<SKEY>>;

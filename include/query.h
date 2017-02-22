@@ -21,18 +21,15 @@ protected:
 		QUERY _query;
 		bool _valid = false;
 		rcode_t _code;
-		cursor_imp() = delete;
 	public:
 		cursor_imp(const QUERY& query) : _query(query) {};
-		virtual cursor_imp * clone() const = 0;
-		virtual const std::pair<KEY, VALUE>& operator*() = 0;
-		virtual const std::pair<KEY, VALUE>* operator->() = 0;
+		virtual cursor_imp * clone() = 0;
 		virtual const KEY key() = 0;
 		virtual const VALUE value() = 0;
 		virtual bool next() = 0;
 		virtual bool valid() = 0;
 		virtual ~cursor_imp() {};
-		virtual char * free_buffer() = 0;
+		virtual char * buffer() = 0;
 	};
 
 public:
@@ -66,7 +63,9 @@ public:
 	};
 
 	virtual cursor find(const QUERY&) = 0;
-	virtual bool find(const KEY&, std::vector<VALUE>&) {}
+	virtual bool find(const KEY&, std::vector<VALUE>&) {
+		return true;
+	}
 	virtual bool insert(const KEY&, const VALUE&) = 0;
 	virtual bool remove(const KEY&) = 0;
 

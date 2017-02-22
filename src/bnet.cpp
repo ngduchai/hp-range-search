@@ -2,6 +2,8 @@
 #include "common.h"
 #include "net.h"
 #include "bnet.h"
+#include "layout.h"
+#include "query.h"
 #include <string.h>
 #include <unistd.h>
 #include <iostream>
@@ -158,9 +160,9 @@ bool LARM::LARM_NET::write(LARM::BYTE data,
 	
 }
 
-LARM::BYTE LARM::LARM_NET::exchange(LARM::BYTE ptr,
+void LARM::LARM_NET::exchange(LARM::BYTE ptr, LARM::BYTE data,
 		size_t size, uint32_t code) {
-	return hosts[get_nodeid(code)]->exchange(ptr, size);
+	hosts[get_nodeid(code)]->exchange(ptr, data, size);
 }
 
 bool LARM::LARM_NET::send(LARM::BYTE ptr, size_t size, uint32_t code) {
@@ -449,7 +451,7 @@ void * LARM::LARM_NET::LARM_NET_BASE::process_task(void * task) {
 		/* Execute task */
 		request->routine(&(request->arg));
 		/* Get result to the host */
-		if (request->arg.ans) {
+		if (request->arg.wrt) {
 			ibv_send_wr wr, *bad_wr = NULL;
 			ibv_sge sge;
 			memset(&wr, 0, sizeof(wr));
@@ -461,18 +463,18 @@ void * LARM::LARM_NET::LARM_NET_BASE::process_task(void * task) {
 			if (request->arg.size < 32) {
 				wr.send_flags |= IBV_SEND_INLINE;
 			}
-			
+			if (request->arg.size > 1234) {
+				cout << ((item_t*)&(((rcode_t*)request->arg.res)[1]))[((rcode_t*)request->arg.res)->num-1].skey << endl;
+			}
+			cout << request->arg.size << endl;
+
 			sge.addr = (uintptr_t)request->arg.res;
 			sge.length = request->arg.size;
 			sge.lkey = s_ctx->data_mr[LARM_GET_REGION(
 				(uintptr_t)request->arg.res)]->lkey;
 			
 			TEST_NZ(ibv_post_send(request->arg.qp,
-				&wr, &bad_wr));	
-		}
-		larm_free(request->arg.req);
-		if (!request->arg.change) {
-			larm_free(request->arg.res);
+				&wr, &bad_wr));
 		}
 		delete request;
 	}
@@ -601,7 +603,7 @@ void LARM::LARM_NET::LARM_NET_BASE::base_client::_on_addr_resolved(
 	buffer = (LARM::BYTE)larm_malloc(BUFFER_SIZE);
 	mr = s_ctx->data_mr[LARM_GET_REGION((uintptr_t)buffer)];
 
-	_post_receive();
+	_post_receive(buffer);
 
 	
 	TEST_NZ(rdma_resolve_route(id, TIMEOUT_IN_MS));
@@ -622,7 +624,7 @@ void LARM::LARM_NET::LARM_NET_BASE::base_client::_on_route_resolved(
 void LARM::LARM_NET::LARM_NET_BASE::base_client::_on_established(
 		void * context) {
 	/* Exchange key */
-	_post_receive();
+	//_post_receive(buffer);
 	
 	ibv_cq * cq;
 	ibv_wc wc;
@@ -675,7 +677,8 @@ void LARM::LARM_NET::LARM_NET_BASE::base_client::_post_send(
 
 }
 
-void LARM::LARM_NET::LARM_NET_BASE::base_client::_post_receive() const {
+void LARM::LARM_NET::LARM_NET_BASE::base_client::_post_receive(
+		LARM::BYTE data) const {
 	ibv_recv_wr wr, *bad_wr;
 	ibv_sge sge;
 
@@ -683,10 +686,14 @@ void LARM::LARM_NET::LARM_NET_BASE::base_client::_post_receive() const {
 	wr.next = NULL;
 	wr.sg_list = &sge;
 	wr.num_sge = 1;
-
+	/*
 	sge.addr = (uintptr_t)buffer;
 	sge.length = BUFFER_SIZE;
 	sge.lkey = mr->lkey;
+	*/
+	sge.addr = (uintptr_t)data;
+	sge.length = 2 * BUFFER_SIZE;
+	sge.lkey = s_ctx->data_mr[LARM_GET_REGION((uintptr_t)data)]->lkey;
 
 	TEST_NZ(ibv_post_recv(_conn->qp, &wr, &bad_wr));
 }
@@ -796,7 +803,7 @@ bool LARM::LARM_NET::LARM_NET_BASE::base_client::write(
 
 bool LARM::LARM_NET::LARM_NET_BASE::base_client::send(
 		LARM::BYTE ptr, size_t size) {
-	/*
+	
 	_post_send(ptr, size);
 	
 	ibv_wc wc;
@@ -809,14 +816,17 @@ bool LARM::LARM_NET::LARM_NET_BASE::base_client::send(
 			}
 		}
 	}
-	*/
+	return true;
+	/*
 	_send_data.push_back(pair<LARM::BYTE, uint32_t>(ptr, size));
 	_send_size += size;
 	return true;
+	*/
 }
 
-LARM::BYTE LARM::LARM_NET::LARM_NET_BASE::base_client::exchange(
-		LARM::BYTE ptr, size_t size) {
+void LARM::LARM_NET::LARM_NET_BASE::base_client::exchange(
+		LARM::BYTE ptr, LARM::BYTE data, size_t size) {
+	/*
 	if (_send_size > 0) {
 		size_t tsize = size + _send_size + sizeof(uint32_t);
 		LARM::BYTE slots = (LARM::BYTE)larm_malloc(tsize);
@@ -834,9 +844,9 @@ LARM::BYTE LARM::LARM_NET::LARM_NET_BASE::base_client::exchange(
 	}else{
 		((packet_t*)ptr)->adata = false;
 	}
-
+	*/
 	_post_send(ptr, size);
-	_post_receive();
+	_post_receive(data);
 
 	
 	ibv_wc wc, wtc;
@@ -853,7 +863,10 @@ LARM::BYTE LARM::LARM_NET::LARM_NET_BASE::base_client::exchange(
 			}
 		}
 	}
-	
+
+	cout << wc.byte_len << endl;
+
+	/*
 	if (_send_size > 0) {
 		for (auto data : _send_data) {
 			larm_free(data.first);
@@ -862,7 +875,7 @@ LARM::BYTE LARM::LARM_NET::LARM_NET_BASE::base_client::exchange(
 		_send_data.erase(_send_data.begin(), _send_data.end());
 		_send_size = 0;
 	}
-
+	
 	size_t sz = wc.byte_len;
 	if (sz == 0) {
 		return NULL;
@@ -878,6 +891,7 @@ LARM::BYTE LARM::LARM_NET::LARM_NET_BASE::base_client::exchange(
 		memcpy(data, buffer, sz);
 		return data;
 	}
+	*/
 }
 
 
