@@ -122,10 +122,8 @@ protected:
 			*addr = (uintptr_t)this->_code.code; addr++;
 			*addr = (uintptr_t)this->buffer();
 			exchange((char*)packet, this->buffer(), size, 0);
-			rcode_t * code = (rcode_t*)this->buffer();
+			//rcode_t * code = (rcode_t*)this->buffer();
 			//code->code = 0;
-			std::cout << code->num << std::endl;
-
 		}
 
 	};

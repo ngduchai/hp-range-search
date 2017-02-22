@@ -25,17 +25,15 @@ int get_items(range_ptr * ptr, char * data) {
 	item_t * items =  (item_t*)(&code[1]);
 	uint64_t checksum = 0;
 	uint32_t num = 0;
-	auto cursor = ptr->cursor;
-	while (cursor.valid() && size < BUFFER_SIZE * 0.7) {
-		*items = *cursor.value();
+	while (ptr->cursor.valid() && size < BUFFER_SIZE - 100) {
+		*items = *ptr->cursor.value();
 		checksum ^= items->skey;
-		num++; items++; size += cursor.value()->size();
-		cursor.next();
+		num++; items++; size += ptr->cursor.value()->size();
+		ptr->cursor.next();
 	}
 	code->checksum = checksum;
 	code->num = num;
-	std::cout << items[-1].size() << std::endl; 
-	if (cursor.valid()) {
+	if (ptr->cursor.valid()) {
 		code->code = (uintptr_t)ptr;
 		code->has_next = true;
 	}else{
@@ -58,7 +56,7 @@ int process_range(packet_t * packet, char * data) {
 }
 
 int update_range(packet_t * packet, char * data) {
-	range_ptr * ptr = (range_ptr*)(&packet[1]);
+	range_ptr * ptr = (range_ptr*)(*(char**)(&packet[1]));
 	int size = get_items(ptr, data);
 	if (!ptr->cursor.valid()) {
 		delete ptr;

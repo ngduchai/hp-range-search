@@ -463,11 +463,6 @@ void * LARM::LARM_NET::LARM_NET_BASE::process_task(void * task) {
 			if (request->arg.size < 32) {
 				wr.send_flags |= IBV_SEND_INLINE;
 			}
-			if (request->arg.size > 1234) {
-				cout << ((item_t*)&(((rcode_t*)request->arg.res)[1]))[((rcode_t*)request->arg.res)->num-1].skey << endl;
-			}
-			cout << request->arg.size << endl;
-
 			sge.addr = (uintptr_t)request->arg.res;
 			sge.length = request->arg.size;
 			sge.lkey = s_ctx->data_mr[LARM_GET_REGION(
@@ -692,7 +687,7 @@ void LARM::LARM_NET::LARM_NET_BASE::base_client::_post_receive(
 	sge.lkey = mr->lkey;
 	*/
 	sge.addr = (uintptr_t)data;
-	sge.length = 2 * BUFFER_SIZE;
+	sge.length = BUFFER_SIZE;
 	sge.lkey = s_ctx->data_mr[LARM_GET_REGION((uintptr_t)data)]->lkey;
 
 	TEST_NZ(ibv_post_recv(_conn->qp, &wr, &bad_wr));
@@ -863,8 +858,6 @@ void LARM::LARM_NET::LARM_NET_BASE::base_client::exchange(
 			}
 		}
 	}
-
-	cout << wc.byte_len << endl;
 
 	/*
 	if (_send_size > 0) {
