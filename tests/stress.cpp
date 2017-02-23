@@ -87,10 +87,7 @@ int main(int argc, char ** argv) {
 	
 	zg = new zipf_generator(0, KEY_SIZE, 0.99);
 
-	add_host("10.2.1.23", "12345");
-	add_host("10.2.1.25", "30289");
-	add_host("10.2.1.25", "12345");
-	add_host("10.2.1.23", "30289");
+	add_host("10.2.1.21", "12345");
 	start_net(time_us() % (1 << 14) + (1 << 14),
 			(LARM::BYTE)get_base(), 2, processor, true);
 
@@ -197,10 +194,6 @@ int main(int argc, char ** argv) {
 	cout << "Throughput: " << ((double)num_chase / (double)time_chase *
 		1e9) << " chases/s" << endl;
 	
-	LARM::BYTE data = (LARM::BYTE)larm_malloc(100);
-	memset(data, 10, 100);
-	exchange(data, 100, 1);
-
 	end_net();
 
 }

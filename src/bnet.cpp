@@ -471,6 +471,8 @@ void * LARM::LARM_NET::LARM_NET_BASE::process_task(void * task) {
 			TEST_NZ(ibv_post_send(request->arg.qp,
 				&wr, &bad_wr));
 		}
+		larm_free(request->arg.res);
+		larm_free(request->arg.req);
 		delete request;
 	}
 }
