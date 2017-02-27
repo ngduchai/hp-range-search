@@ -2,7 +2,13 @@
 #include <iostream>
 #include "bnet.h"
 #include "mm.h"
+
+#ifdef CONF_OL
+#include "query_ol.h"
+#else
 #include "query_base.h"
+#endif
+
 #include "common.h"
 #include "define.h"
 #include "layout.h"
@@ -23,6 +29,7 @@ int main() {
 	}
 	cout << "Get item" << endl;
 	rquery<uint64_t> query(120, 10000);
+	//rquery<uint64_t> query(120, 1220);
 	auto cursor = dbint.find(query);
 	int data = 0;
 	while (cursor.valid()) {

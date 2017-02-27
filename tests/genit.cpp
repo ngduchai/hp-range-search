@@ -7,7 +7,13 @@
 #include "rand.h"
 #include <string.h>
 #include <procs.h>
-#include <query_base.h>
+
+#ifdef CONF_OL
+#include "query_ol.h"
+#else
+#include "query_base.h"
+#endif
+
 #include <layout.h>
 
 using namespace std;

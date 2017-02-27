@@ -496,7 +496,21 @@ void LARM::LARM_NET::LARM_NET_BASE::make_product(
 	request->arg.req = (LARM::BYTE)larm_malloc(size);
 	memcpy(request->arg.req, conn->recv_buffer, size);
 	request->arg.res = (LARM::BYTE)larm_malloc(BUFFER_SIZE);
+	request->next_task = NULL;
 
+	pthread_mutex_lock(&task_mutex[index]);
+	add_task(request, index);
+	pthread_cond_signal(&task_cond_mutex[index]);
+	pthread_mutex_unlock(&task_mutex[index]);
+}
+
+void LARM::LARM_NET::LARM_NET_BASE::request_task(void *(routine)(void * arg),
+		task_arg * arg) {
+	base_task * request = new base_task;
+	request->routine = routine;
+	request->arg = *arg;
+	request->next_task = NULL;
+	int index = genindex();
 	pthread_mutex_lock(&task_mutex[index]);
 	add_task(request, index);
 	pthread_cond_signal(&task_cond_mutex[index]);

@@ -97,6 +97,8 @@ namespace LARM_NET_BASE {
 	void make_product(void *(function)(void * arg),
 			base_connection * conn, size_t size);
 
+	void request_task(void *(routine)(void * arg), task_arg * arg);
+
 	class base_client : public LARM::LARM_NET::client {
 	protected:
 		ibv_context * _ctx;

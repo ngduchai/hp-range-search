@@ -16,11 +16,13 @@ CFLAGS = -Wall -c $(OPT_BW) $(DEBUG) $(STD)
 LFLAGS = -Wall $(OPT_BW) $(DEBUG) $(STD)
 
 ROOT = .
+CONF = CONF_BASE #CONF_OL
+CONF_FILE = ol # base
 
 vpath %.cpp $(SRC)
 vpath %.h $(INCLUDE)
 
-MAKE = $(CC) $(INC)
+MAKE = $(CC) $(INC) -D$(CONF)
 
 HEADER = $(wildcard $(INCLUDE)/*.h)
 HEADER_BW = $(wildcard $(INCLUDE)/bwtree/*.h)
@@ -28,10 +30,10 @@ HEADER_BW = $(wildcard $(INCLUDE)/bwtree/*.h)
 # Object files needed by modules
 TEST_BWTREE = tests/bw.cpp $(addprefix $(OBJ)/, bwtree.o)
 TEST_HUGE = tests/hugepage.cpp $(addprefix $(OBJ)/, mm.o)
-SERVER = tests/server.cpp $(addprefix $(OBJ)/, mm.o procs_base.o bnet.o layout.o) 
-TEST_UNI = tests/uni.cpp $(addprefix $(OBJ)/, mm.o bnet.o procs_base.o layout.o common.o)
+SERVER = tests/server.cpp $(addprefix $(OBJ)/, mm.o procs_ol.o bnet.o layout.o)
+TEST_UNI = tests/uni.cpp $(addprefix $(OBJ)/, mm.o procs_ol.o bnet.o layout.o common.o)
 VERBS = tests/verbs.cpp $(addprefix $(OBJ)/, mm.o hash.o larmdata.o common.o bnet.o intf.o hashtable.o) libs/libcityhash.a
-STRESS = $(addprefix $(OBJ)/, mm.o bnet.o procs_base.o layout.o common.o)
+STRESS = $(addprefix $(OBJ)/, mm.o procs_ol.o bnet.o layout.o common.o)
 
 all:
 
