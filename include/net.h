@@ -43,6 +43,11 @@ namespace LARM_NET {
 	void exchange(LARM::BYTE ptr, LARM::BYTE data,
 			size_t size, uint32_t code);
 
+	void hexchange(LARM::BYTE ptr, LARM::BYTE data,
+			size_t size, uint32_t code);
+
+	void hreceive(uint32_t code);
+
 	/* LARM client. Manage connection to a host in the system */
 	class client {
 	protected:

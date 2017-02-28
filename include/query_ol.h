@@ -70,7 +70,6 @@ protected:
 			_index++; _data++;
 			if (_index == this->_code.num) {
 				if (this->_code.has_next) {
-					request_range();
 					update_query();
 				}else{
 					this->_valid = false;
@@ -89,12 +88,12 @@ protected:
 		}
 
 		void update_query() {
+			/*
 			while (true) {
 				rcode_t * code = (rcode_t*)this->buffer();
 				while (code->code == 0 && code->num == 0) {
 					
 				}
-				/* Check checksum */
 				VALUE* values = (VALUE*)(&code[1]);
 				uint64_t checksum = 0;
 				for (uint32_t i = 0; i < code->num; ++i) {
@@ -105,6 +104,42 @@ protected:
 					_index = 0;
 					_data = (VALUE*)(&code[1]);
 					_buffer_index = 1 - _buffer_index;
+					this->_valid = (code->num > 0);
+					break;
+				}
+			}
+			*/
+			/*
+			hreceive(10);
+			rcode_t * code = (rcode_t*)this->buffer();
+			_data = (VALUE*)(&code[1]);
+			_buffer_index = 1 - _buffer_index;
+			if (code->has_next) {
+				request_range();
+			}
+			this->_code = *code;
+			_index = 0;
+			this->_valid = (code->num > 0);
+			*/
+			hreceive(10);
+			while (true) {
+				rcode_t * code = (rcode_t*)this->buffer();
+				while (code->code == 0 && code->num == 0) {
+					
+				}
+				VALUE* values = (VALUE*)(&code[1]);
+				uint64_t checksum = 0;
+				for (uint32_t i = 0; i < code->num; ++i) {
+					checksum ^= values[i].skey;
+				}
+				if (checksum == code->checksum) {
+					_data = (VALUE*)(&code[1]);
+					_buffer_index = 1 - _buffer_index;
+					this->_code = *code;
+					if (code->has_next) {
+						request_range();
+					}
+					_index = 0;
 					this->_valid = (code->num > 0);
 					break;
 				}
@@ -121,7 +156,7 @@ protected:
 			uintptr_t * addr = (uintptr_t*)(&packet[1]);
 			*addr = (uintptr_t)this->_code.code; addr++;
 			*addr = (uintptr_t)this->buffer();
-			exchange((char*)packet, this->buffer(), size, 0);
+			hexchange((char*)packet, this->buffer(), size, 0);
 			//rcode_t * code = (rcode_t*)this->buffer();
 			//code->code = 0;
 		}
@@ -141,7 +176,7 @@ public:
 		char * data = (char*)&packet[1];
 		data += sizeof(query);
 		*(uintptr_t*)data = (uintptr_t)cursor->buffer();
-		exchange((char*)packet, cursor->buffer(), size, 0);
+		hexchange((char*)packet, cursor->buffer(), size, 0);
 		cursor->update_query();
 		return typename dbInt::cursor(cursor);
 	}

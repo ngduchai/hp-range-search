@@ -452,6 +452,7 @@ void * LARM::LARM_NET::LARM_NET_BASE::process_task(void * task) {
 		request->routine(&(request->arg));
 		/* Get result to the host */
 		if (request->arg.wrt) {
+			/*
 			ibv_send_wr wr, *bad_wr = NULL;
 			ibv_sge sge;
 			memset(&wr, 0, sizeof(wr));
@@ -470,6 +471,30 @@ void * LARM::LARM_NET::LARM_NET_BASE::process_task(void * task) {
 			
 			TEST_NZ(ibv_post_send(request->arg.qp,
 				&wr, &bad_wr));
+			*/
+			ibv_send_wr wr, * bad_wr;
+			ibv_sge sge;
+
+			memset(&wr, 0, sizeof(wr));
+			int index = LARM_GET_REGION(
+				(uintptr_t)request->arg.addr);
+
+			//wr.wr_id = (uintptr_t)this;
+			wr.opcode = IBV_WR_RDMA_WRITE;
+			wr.sg_list = &sge;
+			wr.num_sge = 1;
+			wr.send_flags = IBV_SEND_SIGNALED;
+			wr.wr.rdma.remote_addr = request->arg.addr;
+			wr.wr.rdma.rkey = ;
+
+			sge.addr = (uintptr_t)request->arg.res;
+			sge.length = request->arg.size;
+			sge.lkey = s_ctx->data_mr[LARM_GET_REGION(
+				(uintptr_t)request->arg.res)]->lkey;
+
+			TEST_NZ(ibv_post_send(request->arg.qp,
+				&wr, &bad_wr));
+
 		}
 		larm_free(request->arg.res);
 		larm_free(request->arg.req);
@@ -903,40 +928,7 @@ void LARM::LARM_NET::LARM_NET_BASE::base_client::exchange(
 	*/
 }
 
-void LARM::LARM_NET::hexchange(LARM::BYTE ptr, LARM::BYTE data,
-		size_t size, uint32_t code) {
-	hosts[get_nodeid(code)]->hexchange(ptr, data, size);
 
-}
-
-void LARM::LARM_NET::LARM_NET_BASE::base_client::hexchange(LARM::BYTE ptr,
-		LARM::BYTE data, size_t size) {
-	_post_send(ptr, size);
-	_post_receive(data);
-}
-
-void LARM::LARM_NET::hreceive(uint32_t code) {
-	hosts[get_nodeid(code)]->hreceive();
-
-}
-
-void LARM::LARM_NET::LARM_NET_BASE::base_client::hreceive() {
-	ibv_wc wc, wtc;
-	
-	while (true) {
-		if (ibv_poll_cq(_cq, 1, &wc)) {
-			CHECK_RUNTIME(wc.status != IBV_WC_SUCCESS,
-				"Status is not IBV_WC_SUCCESS");
-			if (wc.opcode & IBV_WC_RECV) {
-				while (ibv_poll_cq(_cq, 1, &wtc)) {
-				
-				}
-				break;
-			}
-		}
-	}
-
-}
 
 
 

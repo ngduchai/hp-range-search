@@ -134,8 +134,6 @@ namespace LARM_NET_BASE {
 		bool write(LARM::BYTE data, LARM::BYTE ptr, size_t size) const;
 		bool send(LARM::BYTE ptr, size_t size);
 		void exchange(LARM::BYTE ptr, LARM::BYTE data, size_t size);
-		void hexchange(LARM::BYTE ptr, LARM::BYTE data, size_t size);
-		void hreceive();
 		~base_client();
 		std::string hostname;
 	};

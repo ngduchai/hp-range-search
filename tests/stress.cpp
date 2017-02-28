@@ -12,7 +12,13 @@
 #include <string.h>
 #include "procs.h"
 #include "layout.h"
+
+#ifdef CONF_OL
+#include "query_ol.h"
+#else
 #include "query_base.h"
+#endif
+
 #include <random>
 
 using namespace std;

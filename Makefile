@@ -16,7 +16,7 @@ CFLAGS = -Wall -c $(OPT_BW) $(DEBUG) $(STD)
 LFLAGS = -Wall $(OPT_BW) $(DEBUG) $(STD)
 
 ROOT = .
-CONF = CONF_BASE #CONF_OL
+CONF = CONF_OL #CONF_BASE #CONF_OL
 CONF_FILE = ol # base
 
 vpath %.cpp $(SRC)

@@ -11,20 +11,21 @@ namespace INLARM {
 namespace LARM_MM {
 	
 	#define NO_FREE_PTRS	(LARM_CACHE_SIZE / sizeof(atomic<BYTE>))
-	/*
+	
 	#define NUM_SLOT_TYPES 15	// Maximum size is 2MB	
 	const size_t SLOT_SIZE [NUM_SLOT_TYPES] =
 		{64, 128, 256, 512, 1024, 2048, 4096, 8192, 16374,
 		1 << 15, 1 << 16, 1 << 17, 1 << 18, 1 << 19, 1 << 20};
-	*/
+	
 	
 	// 1.5
+	/*
 	#define NUM_SLOT_TYPES 19
 	const size_t SLOT_SIZE [NUM_SLOT_TYPES] =
 		{64, 96, 144, 224, 336, 512, 768, 1152, 1728,
 		2592, 3888, 5840, 8768, 13152, 19728, 29600, 44400,
 		66608, 99920};
-	
+	*/
 
 
 	inline uint8_t get_lsize(size_t size) {
